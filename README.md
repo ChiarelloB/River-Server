@@ -3,7 +3,8 @@
 BeamMP server for **BeamNG.drive 0.39** running the **RLS Career Overhaul** career with **RiverLife**, a player-driven
 economy: classifieds with real photos, GPS visits, player-owned car dealerships and workshops with staff and NPC
 customers, gigs, "for sale on the street", the River FIPE price table and the RiverOS computer. Every player keeps their
-own career; the RiverLife economy is shared on the server. The UI is in Brazilian Portuguese.
+own career; the RiverLife economy is shared on the server. RiverLife follows the game language (English, Español,
+Русский, Português); the setup scripts print in Portuguese and this page is their English guide.
 
 No car mods. Players only need BeamNG.drive 0.39 and BeamMP: on join the server hands them RiverLife, RLS and,
 optionally, the River Highway map with its fixes.
