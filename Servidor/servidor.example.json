@@ -1,0 +1,10 @@
+{
+    "name":  "River Server | RLS + RiverLife",
+    "map":  "west_coast_usa",
+    "port":  30814,
+    "maxPlayers":  8,
+    "maxCars":  40,
+    "private":  true,
+    "authKey":  "",
+    "description":  "Carreira RLS com classificados, lojas e oficinas entre jogadores (RiverLife)."
+}

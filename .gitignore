@@ -1,0 +1,13 @@
+# Generated or downloaded when the server is set up and run
+Servidor/BeamMP-Server.exe
+Servidor/servidor.json
+Servidor/ServerConfig.toml
+Servidor/configurado.txt
+Servidor/*.log
+Servidor/opcionais-desligados/
+Servidor/Resources/Server/RiverLife/data/
+Servidor/Resources/Server/RiverLife/photos/
+Servidor/Resources/Server/RiverAdmin/config.json
+Servidor/Resources/Client/*.zip
+!Servidor/Resources/Client/riverlife.zip
+*.part

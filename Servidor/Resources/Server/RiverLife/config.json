@@ -1,0 +1,9 @@
+{
+  "map": "west_coast_usa",
+  "trustCareerImports": true,
+  "allowGuestTokens": true,
+  "npcIntervalSeconds": 150,
+  "npcSellerIntervalSeconds": 300,
+  "npcCustomerIntervalSeconds": 200,
+  "welcomeMessage": true
+}
