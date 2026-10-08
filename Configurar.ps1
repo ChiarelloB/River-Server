@@ -4,7 +4,8 @@
 param(
   [ValidateSet('', 'west_coast_usa', 'river_highway')][string]$Mapa = '',
   [switch]$SemRLS,
-  [switch]$Silencioso
+  [switch]$Silencioso,
+  [switch]$PeloIniciar  # called by Iniciar-Servidor, which starts the server right after
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -41,7 +42,7 @@ function Get-Checked($url, $dest, $sha, $size, $label) {
   Move-Item -LiteralPath $part -Destination $dest -Force
 }
 
-Write-Host "River Server 1.0.0 - configuração" -ForegroundColor Cyan
+Write-Host "River Server 1.1.0 - configuração" -ForegroundColor Cyan
 $running = @(Get-Process -Name 'BeamMP-Server' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $server 'BeamMP-Server.exe') })
 if ($running.Count) { Write-Host 'Pare o servidor antes de configurar (Parar-Servidor.cmd).' -ForegroundColor Yellow; exit 1 }
 
@@ -50,7 +51,7 @@ if (-not $Silencioso) {
     Write-Host ''
     Write-Host 'Mapa do servidor:'
     Write-Host '  1) West Coast USA  - vem com o BeamNG, nada para baixar'
-    Write-Host '  2) River Highway   - baixa o mapa (1,7 GB) e as correções riverpack'
+    Write-Host '  2) River Highway   - baixa o mapa já com as correções riverpack (1,8 GB)'
     $c = Read-Host "Escolha [1/2] (Enter = $($s.map))"
     if ($c -eq '1') { $Mapa = 'west_coast_usa' } elseif ($c -eq '2') { $Mapa = 'river_highway' }
   }
@@ -70,6 +71,14 @@ Get-Checked $b.url (Join-Path $server 'BeamMP-Server.exe') $b.sha256 $b.size ("B
 
 Write-Host 'Mods entregues aos jogadores ao entrar:'
 New-Item -ItemType Directory -Path $client -Force | Out-Null
+# Files of older releases (the map without the fixes, the separate riverpack.zip): two River Highway maps would clash.
+foreach ($old in @($cfg.obsoletos)) {
+  if (-not $old) { continue }
+  foreach ($dir in @($client, $parked)) {
+    $f = Join-Path $dir $old
+    if (Test-Path -LiteralPath $f) { Remove-Item -LiteralPath $f -Force; Write-Host "  $old - removido (substituído nesta versão)." }
+  }
+}
 foreach ($o in $cfg.opcionais) {
   $wanted = if ($o.id -eq 'rls') { -not $SemRLS } else { @($o.mapas) -contains $Mapa }
   $dest = Join-Path $client $o.arquivo
@@ -91,8 +100,8 @@ $pluginCfg = Join-Path $server 'Resources\Server\RiverLife\config.json'
 $p = [IO.File]::ReadAllText($pluginCfg, [Text.Encoding]::UTF8) | ConvertFrom-Json
 $p.map = $Mapa
 Write-Utf8 $pluginCfg ($p | ConvertTo-Json)
-Write-Utf8 (Join-Path $server 'configurado.txt') ("mapa=$Mapa`nrls=" + (-not $SemRLS) + "`n")
+Write-Utf8 (Join-Path $server 'configurado.txt') ("mapa=$Mapa`nrls=" + (-not $SemRLS) + "`nversao=1.1.0`n")
 
 Write-Host ''
 Write-Host "Pronto: mapa $Mapa$(if ($SemRLS) { ', sem RLS (os jogadores precisam tê-lo)' })." -ForegroundColor Green
-Write-Host 'Agora rode Iniciar-Servidor.cmd.'
+if (-not $PeloIniciar) { Write-Host 'Agora rode Iniciar-Servidor.cmd.' }

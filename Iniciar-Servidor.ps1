@@ -9,17 +9,42 @@ $exe = Join-Path $server 'BeamMP-Server.exe'
 $running = @(Get-Process -Name 'BeamMP-Server' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $exe })
 if ($running.Count) { Write-Host 'O River Server já está rodando.' -ForegroundColor Yellow; exit 0 }
 
-# First run (or another map): the setup downloads what is missing.
-$configured = (Test-Path -LiteralPath $exe) -and (Test-Path -LiteralPath (Join-Path $server 'configurado.txt'))
+$cfg = [IO.File]::ReadAllText((Join-Path $root 'opcionais.json'), [Text.Encoding]::UTF8) | ConvertFrom-Json
+$client = Join-Path $server 'Resources\Client'
+$statePath = Join-Path $server 'configurado.txt'
+$state = @{}
+if (Test-Path -LiteralPath $statePath) {
+  foreach ($line in [IO.File]::ReadAllLines($statePath)) { $k, $v = $line -split '=', 2; if ($null -ne $v) { $state[$k] = $v } }
+}
+$semRLS = $state['rls'] -eq 'False'
+
+# What this release hands the players for $map but is missing or outdated here, plus files of older releases.
+function Get-Pending($map) {
+  $out = @()
+  foreach ($o in $cfg.opcionais) {
+    $wanted = if ($o.id -eq 'rls') { -not $semRLS } else { @($o.mapas) -contains $map }
+    $f = Join-Path $client $o.arquivo
+    if ($wanted -and (-not (Test-Path -LiteralPath $f) -or (Get-Item -LiteralPath $f).Length -ne $o.size)) { $out += $o.nome }
+  }
+  foreach ($old in @($cfg.obsoletos)) { if ($old -and (Test-Path -LiteralPath (Join-Path $client $old))) { $out += $old } }
+  $out
+}
+
+# First run, another map, or a new release extracted over this folder: the setup downloads what is missing.
+$configured = (Test-Path -LiteralPath $exe) -and (Test-Path -LiteralPath $statePath)
 $current = if (Test-Path -LiteralPath $settingsPath) { ([IO.File]::ReadAllText($settingsPath, [Text.Encoding]::UTF8) | ConvertFrom-Json).map } else { '' }
 if (-not $configured) {
-  & (Join-Path $root 'Configurar.ps1') -Mapa $Mapa
+  & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $Mapa
 } elseif ($Mapa -and $Mapa -ne $current) {
-  & (Join-Path $root 'Configurar.ps1') -Mapa $Mapa -Silencioso
+  & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $Mapa -Silencioso -SemRLS:$semRLS
+} elseif ($state['versao'] -ne '1.1.0' -or @(Get-Pending $current).Count) {
+  Write-Host "Atualizando para o River Server 1.1.0..." -ForegroundColor Cyan
+  & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $current -Silencioso -SemRLS:$semRLS
 }
 $s = [IO.File]::ReadAllText($settingsPath, [Text.Encoding]::UTF8) | ConvertFrom-Json
-if ($s.map -eq 'river_highway' -and -not (Test-Path -LiteralPath (Join-Path $server 'Resources\Client\rls_river_highway_public_0.1.zip'))) {
-  Write-Host 'O mapa River Highway não está no servidor: rode Configurar.cmd.' -ForegroundColor Yellow; exit 1
+$pending = @(Get-Pending $s.map)
+if ($pending.Count) {
+  Write-Host ("Faltam arquivos no servidor ({0}): rode Configurar.cmd." -f ($pending -join ', ')) -ForegroundColor Yellow; exit 1
 }
 
 $key = [string]$s.authKey

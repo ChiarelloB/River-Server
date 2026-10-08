@@ -1,4 +1,4 @@
-# River Server 1.0.0
+# River Server 1.1.0
 
 Servidor BeamMP com a carreira do **RLS Career Overhaul** e o **RiverLife**: classificados com fotos, visitas pelo GPS,
 lojas de carros e oficinas dos jogadores com funcionários e clientes NPC, bicos, "vende-se na rua", Tabela FIPE do
@@ -9,10 +9,10 @@ entrega a eles o RiverLife, o RLS e (se você escolher) o mapa River Highway com
 
 ## Instalar e rodar (Windows)
 
-1. Baixe **River-Server-v1.0.0.zip** em *Releases* e extraia numa pasta (ex.: `C:\RiverServer`).
+1. Baixe **River-Server-v1.1.0.zip** em *Releases* e extraia numa pasta (ex.: `C:\RiverServer`).
 2. Dê dois cliques em **Iniciar-Servidor.cmd**. Na primeira vez ele pergunta:
-   - **Mapa**: West Coast USA (vem com o jogo) ou River Highway (baixa o mapa, 1,7 GB, e o *riverpack* com as
-     correções de árvores, guard-rails, materiais e entregas).
+   - **Mapa**: West Coast USA (vem com o jogo) ou River Highway (baixa o mapa, 1,8 GB, já com o *riverpack*: as
+     correções de árvores, guard-rails, materiais, texturas e entregas para o BeamNG 0.39 e o RLS 2.7.1).
    - **RLS**: se entrega o RLS Career Overhaul aos jogadores (recomendado: é ele que dá a carreira).
 
    O script baixa o **BeamMP-Server 3.9.3 oficial** (GitHub do BeamMP) e os opcionais escolhidos desta release,
@@ -39,8 +39,13 @@ Crie a chave em <https://keymaster.beammp.com> (login com Discord), cole em `Ser
 - `rl give <nome> <dólares>` — dinheiro para um jogador.
 - `admin add <conta BeamMP>` — admin (no chat do jogo: `/kick`, `/ban`, `/whitelist`, `/aviso`, `/ajuda`).
 
-Os dados do RiverLife ficam em `Servidor\Resources\Server\RiverLife\data`. Para atualizar, baixe a release nova e
-copie por cima com o servidor parado (os dados e o `servidor.json` ficam).
+Os dados do RiverLife ficam em `Servidor\Resources\Server\RiverLife\data`.
+
+## Atualizar
+
+Pare o servidor, baixe a release nova e copie o conteúdo da pasta `River-Server-vX` por cima da sua (substituir
+arquivos). Os dados, o `servidor.json` e os downloads ficam. No próximo **Iniciar-Servidor.cmd** ele percebe a versão
+nova, baixa só o que mudou, apaga os arquivos que a versão nova substituiu e sobe o servidor com o mesmo mapa.
 
 ## Arquivos
 
@@ -52,4 +57,4 @@ copie por cima com o servidor parado (os dados e o `servidor.json` ficam).
 | `Servidor\servidor.json` | Nome, porta, vagas, mapa, chave do BeamMP. |
 | `opcionais.json` | Endereços e SHA-256 do BeamMP-Server e dos opcionais. |
 
-Versão 1.0.0 (RiverLife d79389a). Créditos de terceiros em `THIRD_PARTY_NOTICES.md`.
+Versão 1.1.0 (RiverLife 2bedc35). Créditos de terceiros em `THIRD_PARTY_NOTICES.md`.

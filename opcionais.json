@@ -13,35 +13,27 @@
       "necessario": true,
       "mapas": [],
       "descricao": "A carreira do RLS. O RiverLife roda dentro dela: sem ele não há carreira.",
-      "url": "https://github.com/ChiarelloB/River-Server/releases/download/v1.0.0/rls_career_overhaul_2.7.1_hotfix.zip",
+      "url": "https://github.com/ChiarelloB/River-Server/releases/download/v1.1.0/rls_career_overhaul_2.7.1_hotfix.zip",
       "sha256": "7872f3f1621fe93acd87167980361258a197663c479d322676a1a88d8f99cf66",
       "size": 560738844
     },
     {
       "id": "river_highway",
-      "nome": "Mapa River Highway (PowerHaus Rework)",
-      "arquivo": "rls_river_highway_public_0.1.zip",
+      "nome": "Mapa River Highway + correções riverpack",
+      "arquivo": "rls_river_highway_fixed_v0.1.1.zip",
       "necessario": false,
       "mapas": [
         "river_highway"
       ],
-      "descricao": "Mapa com carreira RLS (1,7 GB).",
-      "url": "https://github.com/ChiarelloB/River-Server/releases/download/v1.0.0/rls_river_highway_public_0.1.zip",
-      "sha256": "f846e51a802979f39852663b3c656f7b39efd496e328583744b944163008f046",
-      "size": 1753446340
-    },
-    {
-      "id": "riverpack",
-      "nome": "Correções do River Highway (riverpack)",
-      "arquivo": "riverpack.zip",
-      "necessario": false,
-      "mapas": [
-        "river_highway"
-      ],
-      "descricao": "Árvores, guard-rails, materiais e entregas do River Highway no RLS.",
-      "url": "https://github.com/ChiarelloB/River-Server/releases/download/v1.0.0/riverpack.zip",
-      "sha256": "d19cdd3541212fb4837406310d91b8656a064354ee455aa4dd7a7398a8f8c8c8",
-      "size": 11169
+      "descricao": "Mapa com carreira RLS e as correções do River Pack (árvores, guard-rails, materiais, texturas e entregas).",
+      "url": "https://github.com/ChiarelloB/RiverHighway-RLS-Fixed/releases/download/v0.1.1/rls_river_highway_fixed_v0.1.1.zip",
+      "sha256": "03d45b21e8faef113ed792b11084c89f484b5726d9cec48dfae78554be8735ed",
+      "size": 1801699799,
+      "externo": true
     }
+  ],
+  "obsoletos": [
+    "riverpack.zip",
+    "rls_river_highway_public_0.1.zip"
   ]
 }

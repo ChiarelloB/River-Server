@@ -581,7 +581,7 @@ end
 
 function RLJoin(pid)
   if cfg.welcomeMessage then
-    MP.SendChatMessage(pid, 'Bem-vindo! Este servidor usa o RiverLife. Abra o PC de qualquer garagem ou o app RiverLife no celular para classificados, lojas e oficinas.')
+    MP.SendChatMessage(pid, 'Welcome! This server runs RiverLife: open the PC in any garage or the RiverLife phone app for classifieds, dealerships and workshops. | Bem-vindo! Este servidor usa o RiverLife. Abra o PC de qualquer garagem ou o app RiverLife no celular para classificados, lojas e oficinas.')
   end
 end
 
