@@ -42,7 +42,7 @@ function Get-Checked($url, $dest, $sha, $size, $label) {
   Move-Item -LiteralPath $part -Destination $dest -Force
 }
 
-Write-Host "River Server 1.1.1 - configuração" -ForegroundColor Cyan
+Write-Host "River Server 1.1.2 - configuração" -ForegroundColor Cyan
 $running = @(Get-Process -Name 'BeamMP-Server' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $server 'BeamMP-Server.exe') })
 if ($running.Count) { Write-Host 'Pare o servidor antes de configurar (Parar-Servidor.cmd).' -ForegroundColor Yellow; exit 1 }
 
@@ -100,7 +100,7 @@ $pluginCfg = Join-Path $server 'Resources\Server\RiverLife\config.json'
 $p = [IO.File]::ReadAllText($pluginCfg, [Text.Encoding]::UTF8) | ConvertFrom-Json
 $p.map = $Mapa
 Write-Utf8 $pluginCfg ($p | ConvertTo-Json)
-Write-Utf8 (Join-Path $server 'configurado.txt') ("mapa=$Mapa`nrls=" + (-not $SemRLS) + "`nversao=1.1.1`n")
+Write-Utf8 (Join-Path $server 'configurado.txt') ("mapa=$Mapa`nrls=" + (-not $SemRLS) + "`nversao=1.1.2`n")
 
 Write-Host ''
 Write-Host "Pronto: mapa $Mapa$(if ($SemRLS) { ', sem RLS (os jogadores precisam tê-lo)' })." -ForegroundColor Green

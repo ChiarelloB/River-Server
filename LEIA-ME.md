@@ -1,4 +1,4 @@
-# River Server 1.1.1
+# River Server 1.1.2
 
 Servidor BeamMP com a carreira do **RLS Career Overhaul** e o **RiverLife**: classificados com fotos, visitas pelo GPS,
 lojas de carros e oficinas dos jogadores com funcionários e clientes NPC, bicos, "vende-se na rua", Tabela FIPE do
@@ -9,7 +9,7 @@ entrega a eles o RiverLife, o RLS e (se você escolher) o mapa River Highway com
 
 ## Instalar e rodar (Windows)
 
-1. Baixe **River-Server-v1.1.1.zip** em *Releases* e extraia numa pasta (ex.: `C:\RiverServer`).
+1. Baixe **River-Server-v1.1.2.zip** em *Releases* e extraia numa pasta (ex.: `C:\RiverServer`).
 2. Dê dois cliques em **Iniciar-Servidor.cmd**. Na primeira vez ele pergunta:
    - **Mapa**: West Coast USA (vem com o jogo) ou River Highway (baixa o mapa, 1,8 GB, já com o *riverpack*: as
      correções de árvores, guard-rails, materiais, texturas e entregas para o BeamNG 0.39 e o RLS 2.7.1).
@@ -65,4 +65,4 @@ nova, baixa só o que mudou, apaga os arquivos que a versão nova substituiu e s
 | `Servidor\servidor.json` | Nome, porta, vagas, mapa, chave do BeamMP, vendedores NPC. |
 | `opcionais.json` | Endereços e SHA-256 do BeamMP-Server e dos opcionais. |
 
-Versão 1.1.1 (RiverLife 3ed4ea8). Créditos de terceiros em `THIRD_PARTY_NOTICES.md`.
+Versão 1.1.2 (RiverLife 73e145c). Créditos de terceiros em `THIRD_PARTY_NOTICES.md`.

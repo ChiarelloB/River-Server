@@ -37,8 +37,8 @@ if (-not $configured) {
   & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $Mapa
 } elseif ($Mapa -and $Mapa -ne $current) {
   & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $Mapa -Silencioso -SemRLS:$semRLS
-} elseif ($state['versao'] -ne '1.1.1' -or @(Get-Pending $current).Count) {
-  Write-Host "Atualizando para o River Server 1.1.1..." -ForegroundColor Cyan
+} elseif ($state['versao'] -ne '1.1.2' -or @(Get-Pending $current).Count) {
+  Write-Host "Atualizando para o River Server 1.1.2..." -ForegroundColor Cyan
   & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $current -Silencioso -SemRLS:$semRLS
 }
 $s = [IO.File]::ReadAllText($settingsPath, [Text.Encoding]::UTF8) | ConvertFrom-Json

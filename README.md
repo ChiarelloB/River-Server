@@ -11,7 +11,7 @@ optionally, the River Highway map with its fixes.
 
 ## Quick start (Windows)
 
-1. Download **River-Server-v1.1.1.zip** from [Releases](../../releases/latest) and extract it.
+1. Download **River-Server-v1.1.2.zip** from [Releases](../../releases/latest) and extract it.
 2. Run **Iniciar-Servidor.cmd**. The first time it asks for the map (West Coast USA, or River Highway: 1.8 GB map with the
    *riverpack* fixes built in) and whether to hand RLS to the players (recommended), downloads the official BeamMP-Server 3.9.3
    and the chosen optional files (SHA-256 checked) and starts the server.
@@ -32,6 +32,6 @@ Full guide (Portuguese): [LEIA-ME.md](LEIA-ME.md). Credits: [THIRD_PARTY_NOTICES
 
 # River Server (português)
 
-Servidor BeamMP com a carreira do RLS e o RiverLife. Baixe o **River-Server-v1.1.1.zip** em *Releases*, extraia e rode
+Servidor BeamMP com a carreira do RLS e o RiverLife. Baixe o **River-Server-v1.1.2.zip** em *Releases*, extraia e rode
 **Iniciar-Servidor.cmd**: ele pergunta o mapa (West Coast USA ou River Highway) e se entrega o RLS aos jogadores, baixa o
 que precisa e sobe o servidor. Guia completo em [LEIA-ME.md](LEIA-ME.md).

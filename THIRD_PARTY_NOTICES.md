@@ -1,4 +1,4 @@
-# Credits and third-party notices — River Server 1.1.1
+# Credits and third-party notices — River Server 1.1.2
 
 **River Server** (scripts, the RiverLife mod and server plugin, RiverAdmin and the *riverpack* River Highway fixes) is
 original work by Chiarello.
