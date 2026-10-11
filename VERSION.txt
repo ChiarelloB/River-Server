@@ -1,1 +1,1 @@
-River Server 1.1.0 (RiverLife 2bedc35)
+River Server 1.1.1 (RiverLife 3ed4ea8)

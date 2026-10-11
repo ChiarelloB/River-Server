@@ -193,7 +193,7 @@ local function clamp(v, a, b) if v < a then return a elseif v > b then return b 
 M.copy, M.distance, M.safeConfig, M.withinHours = copy, distance, safeConfig, withinHours
 
 local TABLES = {'accounts', 'assets', 'listings', 'visits', 'offers', 'stores', 'workshops', 'orders', 'receipts',
-  'npcs', 'messages', 'requests', 'vacancies', 'gigs', 'spots', 'feed', 'fipe'}
+  'npcs', 'messages', 'requests', 'vacancies', 'gigs', 'spots', 'spotsMeta', 'feed', 'fipe'}
 
 function M.newState()
   local s = {schema = M.SCHEMA, revision = 0, sequence = 0, treasury = 0, seed = 20261008, simAt = 0}
@@ -240,6 +240,16 @@ function M.migrate(state)
   state.revision = state.revision or 0
   state.schema = M.SCHEMA
   return state
+end
+
+-- What clients should report next for a map: roadside points (gigs) until there are 40, then parking
+-- spots (NPC sellers) until there are 40 or as many as the map has.
+function M.spotsNeeded(s, map)
+  local road, parking = 0, 0
+  for _, sp in ipairs((s.spots or {})[map] or {}) do if sp.k == 'p' then parking = parking + 1 else road = road + 1 end end
+  local meta = (s.spotsMeta or {})[map]
+  if road < 40 or not meta then return true end
+  return meta.parking > 0 and parking < math.min(40, meta.parking)
 end
 
 local function summarize(data)
@@ -625,6 +635,8 @@ function M.new(env, state)
     table.sort(out.fipe, function(a, b) return (a.at or 0) > (b.at or 0) end)
     while #out.fipe > 60 do table.remove(out.fipe) end
     for map, list in pairs(s.spots) do out.spotsCount[map] = #list end
+    out.spotsNeeded = {}
+    for map in pairs(s.spots) do out.spotsNeeded[map] = M.spotsNeeded(s, map) end
     for _, l in pairs(s.listings) do
       if l.status == 'active' or l.seller == id then out.listings[#out.listings + 1] = publicListing(s, l) end
     end
@@ -699,7 +711,7 @@ function M.new(env, state)
     return out
   end
 
-  local validSpots, newNpcAccount
+  local validSpots, newNpcAccount, retireNpcAds
   local handlers = {}
   -- Internal callbacks shared across sections (never request operations).
   local hooks = {}
@@ -1854,25 +1866,41 @@ function M.new(env, state)
     return {quit = b.id}
   end
 
-  -- Map spots: road positions reported by clients, used by the server to place
-  -- NPC private sellers and transfer jobs anywhere on the map.
+  -- Map spots reported by clients, used to place NPC private sellers and transfer jobs anywhere on
+  -- the map: roadside points (k = nil) and parking spots clear of the road (k = 'p': driveways, car
+  -- parks). NPC sellers only ever park on 'p' spots; p.parking says how many the map has (0: none).
   function handlers.contributeSpots(s, id, p, ctx)
     local map = ctx.map or p.map
-    check(text(map, 64) and type(p.spots) == 'table' and #p.spots <= 40, 'invalid_spots')
+    check(text(map, 64) and type(p.spots) == 'table' and #p.spots <= 2 * C.SPOTS_MAX, 'invalid_spots')
+    check(p.parking == nil or integer(p.parking, 0, 100000), 'invalid_spots')
     s.spots[map] = s.spots[map] or {}
     local list = s.spots[map]
-    local added = 0
+    local added, parkingAdded = 0, 0
     for _, sp in ipairs(p.spots) do
       if position(sp) and (sp.h == nil or (type(sp.h) == 'number' and sp.h == sp.h)) then
+        local kind = sp.k == 'p' and 'p' or nil
         local near = false
-        for _, other in ipairs(list) do if distance(other, sp) < C.SPOT_SPACING then near = true; break end end
+        for _, other in ipairs(list) do
+          if other.k == kind and distance(other, sp) < C.SPOT_SPACING then near = true; break end
+        end
         if not near then
-          list[#list + 1] = {x = sp.x, y = sp.y, z = sp.z, h = sp.h or 0}
+          list[#list + 1] = {x = sp.x, y = sp.y, z = sp.z, h = sp.h or 0, k = kind}
           added = added + 1
+          if kind then parkingAdded = parkingAdded + 1 end
         end
       end
     end
-    while #list > C.SPOTS_MAX do table.remove(list, 1) end
+    -- At most SPOTS_MAX of each kind; the oldest go first.
+    for _, kind in ipairs({'p', 'road'}) do
+      local count = 0
+      for _, sp in ipairs(list) do if (sp.k or 'road') == kind then count = count + 1 end end
+      local i = 1
+      while count > C.SPOTS_MAX and i <= #list do
+        if (list[i].k or 'road') == kind then table.remove(list, i); count = count - 1 else i = i + 1 end
+      end
+    end
+    if p.parking ~= nil then s.spotsMeta[map] = {parking = p.parking, at = now()} end
+    if parkingAdded > 0 then retireNpcAds(s, map, function(l) return not l.parking end) end
     return {added = added, total = #list}
   end
 
@@ -1910,9 +1938,27 @@ function M.new(env, state)
     return {model = car.model, config = car.config, niceName = car.name, mileage = mileage, year = car.year,
       configBaseValue = value, value = value, wear = condition, condition = math.floor(condition * 100), tradeIn = true}
   end
+  local function parkingSpots(s, map)
+    local out = {}
+    for _, sp in ipairs(s.spots[map] or {}) do if sp.k == 'p' then out[#out + 1] = sp end end
+    return out
+  end
+  -- Driveways and car parks when the map has them (gig cars too), otherwise the roadside points.
+  local function gigSpots(s, map, minimum)
+    local parking = parkingSpots(s, map)
+    if #parking >= minimum then return parking end
+    return s.spots[map] or {}
+  end
+  -- NPC ads that should go (parked by the road before the map reported parking spots, or above the
+  -- server's limit) leave at the next expiry check, unless a player has a visit booked.
+  function retireNpcAds(s, map, which)
+    for _, l in pairs(s.listings) do
+      if l.npcSeller and l.status == 'active' and l.map == map and not l.reservation and which(l) then l.expiresAt = now() end
+    end
+  end
   local function freeAdSpot(s, map)
-    local spots = s.spots[map]
-    if not spots or #spots < 3 then return nil end
+    local spots = parkingSpots(s, map)
+    if #spots < 3 then return nil end
     local start = 1 + math.floor(rnd(s) * #spots)
     for k = 0, #spots - 1 do
       local sp = spots[(start + k - 1) % #spots + 1]
@@ -1939,7 +1985,7 @@ function M.new(env, state)
     local lid = nextId(s, 'ad-')
     s.listings[lid] = {id = lid, assetId = vin, seller = nid, status = 'active', title = car.name,
       description = pickFrom(s, AD_TEXTS), price = math.max(C.MIN_PRICE, asking), photos = {}, position = pos(sp),
-      heading = sp.h or 0, map = map, display = true, npcSeller = true, minimum = math.floor(value * between(s, 0.7, 0.9)),
+      heading = sp.h or 0, map = map, display = true, npcSeller = true, parking = true, minimum = math.floor(value * between(s, 0.7, 0.9)),
       createdAt = now(), expiresAt = now() + C.NPC_AD_TTL, views = 0, negotiable = true, revision = 1}
     s.assets[vin].listingId = lid
     return s.listings[lid]
@@ -1947,8 +1993,8 @@ function M.new(env, state)
 
   -- Gigs ("bicos") -------------------------------------------------------------------
   local function spawnGig(s, map)
-    local spots = s.spots[map]
-    if not spots or #spots < 4 then return nil end
+    local spots = gigSpots(s, map, 4)
+    if #spots < 4 then return nil end
     for _ = 1, 10 do
       local a, b = pickFrom(s, spots), pickFrom(s, spots)
       local d = distance(a, b)
@@ -2015,8 +2061,8 @@ function M.new(env, state)
     check(not a.firstSteps.gig and not a.firstSteps.starterGig, 'starter_used')
     check(not activeGig(s, id), 'gig_in_progress')
     check(position(ctx.position) and text(ctx.map, 64), 'location_unavailable')
-    local spots = s.spots[ctx.map]
-    check(spots and #spots >= 4, 'no_spots')
+    local spots = gigSpots(s, ctx.map, 4)
+    check(#spots >= 4, 'no_spots')
     local near = {}
     for _, sp in ipairs(spots) do
       local d = distance(sp, ctx.position)
@@ -2229,10 +2275,16 @@ function M.new(env, state)
     end
     local map = ctx and ctx.map
     if map and s.spots[map] then
+      -- The server may lower the number of NPC private sellers (0 turns them off).
+      local limit = ctx.npcAds and math.max(0, math.floor(ctx.npcAds)) or C.NPC_ADS
       local ads, gigs = 0, 0
       for _, l in pairs(s.listings) do if l.npcSeller and l.status == 'active' and l.map == map then ads = ads + 1 end end
       for _, g in pairs(s.gigs) do if g.kind == 'translado' and g.status == 'open' and g.map == map and not g.reservedFor then gigs = gigs + 1 end end
-      for _ = ads + 1, C.NPC_ADS do if not spawnNpcAd(s, map) then break end end
+      if ads > limit then
+        local extra = ads - limit
+        retireNpcAds(s, map, function() extra = extra - 1; return extra >= 0 end)
+      end
+      for _ = ads + 1, limit do if not spawnNpcAd(s, map) then break end end
       for _ = gigs + 1, C.GIGS_OPEN do if not spawnGig(s, map) then break end end
     end
   end

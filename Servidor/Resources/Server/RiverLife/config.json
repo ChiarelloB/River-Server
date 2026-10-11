@@ -5,5 +5,6 @@
   "npcIntervalSeconds": 150,
   "npcSellerIntervalSeconds": 300,
   "npcCustomerIntervalSeconds": 200,
-  "welcomeMessage": true
+  "welcomeMessage": true,
+  "npcPrivateSellers": 6
 }

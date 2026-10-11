@@ -37,14 +37,22 @@ if (-not $configured) {
   & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $Mapa
 } elseif ($Mapa -and $Mapa -ne $current) {
   & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $Mapa -Silencioso -SemRLS:$semRLS
-} elseif ($state['versao'] -ne '1.1.0' -or @(Get-Pending $current).Count) {
-  Write-Host "Atualizando para o River Server 1.1.0..." -ForegroundColor Cyan
+} elseif ($state['versao'] -ne '1.1.1' -or @(Get-Pending $current).Count) {
+  Write-Host "Atualizando para o River Server 1.1.1..." -ForegroundColor Cyan
   & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $current -Silencioso -SemRLS:$semRLS
 }
 $s = [IO.File]::ReadAllText($settingsPath, [Text.Encoding]::UTF8) | ConvertFrom-Json
 $pending = @(Get-Pending $s.map)
 if ($pending.Count) {
   Write-Host ("Faltam arquivos no servidor ({0}): rode Configurar.cmd." -f ($pending -join ', ')) -ForegroundColor Yellow; exit 1
+}
+
+# Plugin settings kept in servidor.json (it survives updates; the plugin's config.json comes with each release).
+$pluginCfg = Join-Path $server 'Resources\Server\RiverLife\config.json'
+if ($null -ne $s.npcPrivateSellers -and (Test-Path -LiteralPath $pluginCfg)) {
+  $p = [IO.File]::ReadAllText($pluginCfg, [Text.Encoding]::UTF8) | ConvertFrom-Json
+  $p | Add-Member -NotePropertyName npcPrivateSellers -NotePropertyValue ([int]$s.npcPrivateSellers) -Force
+  [IO.File]::WriteAllText($pluginCfg, ($p | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
 }
 
 $key = [string]$s.authKey

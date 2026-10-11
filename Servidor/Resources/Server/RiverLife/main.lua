@@ -17,6 +17,7 @@ local DEFAULTS = {
   trustCareerImports = true, allowGuestTokens = true, map = 'west_coast_usa', maxPhotoBytes = 524288,
   npcIntervalSeconds = 150, npcSellerIntervalSeconds = 300, npcCustomerIntervalSeconds = 200,
   npcOwnerRadius = 250, presenceSeconds = 2, backupsToKeep = 3, welcomeMessage = true,
+  npcPrivateSellers = 6, -- NPC cars for sale parked in driveways and car parks (0 = none)
 }
 
 local function log(msg) print('[RiverLife] ' .. msg) end
@@ -490,10 +491,10 @@ local function assignDisplays()
   end
 end
 
--- The server knows no roads: clients report roadside spots for NPC sellers and jobs.
+-- The server knows no roads: clients report roadside spots (jobs) and parking spots (NPC sellers).
 local function askForSpots(t)
   local spots = market.state.spots[cfg.map]
-  if spots and #spots >= 40 then return end
+  if not Domain.spotsNeeded(market.state, cfg.map) then return end
   if t - lastSpotsAsk < 90 then return end
   local list = {}
   for pid in pairs(MP.GetPlayers() or {}) do if MP.IsPlayerConnected(pid) and identities[pid] then list[#list + 1] = pid end end
@@ -538,7 +539,7 @@ function RLTick()
   if market:needsTick(t) then
     for id, a in pairs(market.state.accounts) do
       if not a.npc then
-        local r = market:dispatch(id, {id = 'timer-' .. t .. '-' .. timerTicks, op = 'tick'}, {map = cfg.map, hour = anyHour()})
+        local r = market:dispatch(id, {id = 'timer-' .. t .. '-' .. timerTicks, op = 'tick'}, {map = cfg.map, hour = anyHour(), npcAds = tonumber(cfg.npcPrivateSellers)})
         if r.ok then dirty = true end
         break
       end

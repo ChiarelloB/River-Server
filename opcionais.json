@@ -15,7 +15,8 @@
       "descricao": "A carreira do RLS. O RiverLife roda dentro dela: sem ele não há carreira.",
       "url": "https://github.com/ChiarelloB/River-Server/releases/download/v1.1.0/rls_career_overhaul_2.7.1_hotfix.zip",
       "sha256": "7872f3f1621fe93acd87167980361258a197663c479d322676a1a88d8f99cf66",
-      "size": 560738844
+      "size": 560738844,
+      "externo": true
     },
     {
       "id": "river_highway",
