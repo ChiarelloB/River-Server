@@ -7,5 +7,6 @@
     "private":  true,
     "authKey":  "",
     "description":  "Carreira RLS com classificados, lojas e oficinas entre jogadores (RiverLife).",
-    "npcPrivateSellers":  6
+    "npcPrivateSellers":  6,
+    "careerSaves":  "server"
 }

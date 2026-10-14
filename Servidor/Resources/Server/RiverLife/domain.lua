@@ -719,16 +719,21 @@ function M.new(env, state)
   -- Accounts and wallet ------------------------------------------------------
   function handlers.hello(s, id, p, ctx)
     check(text(ctx.name, 64), 'invalid_name')
+    local fresh = false
     if not s.accounts[id] then
       check(ctx.allowImport == true, 'career_import_disabled')
       check(integer(p.balance, 0, 10000000000), 'invalid_balance')
       s.accounts[id] = {id = id, name = ctx.name, balance = p.balance, reputation = 0, sales = 0, purchases = 0,
         earnings = 0, careerRevision = 0, createdAt = now()}
+      fresh = true
     else
       s.accounts[id].name = ctx.name
     end
     s.accounts[id].lastSeen = now()
-    return snapshot(s, id)
+    local out = snapshot(s, id)
+    -- The account was made from the money of the save the player has now: nothing to reconcile.
+    if fresh then out.fresh = true end
+    return out
   end
   function handlers.wallet(s, id, p, ctx)
     check(ctx.allowImport == true, 'career_import_disabled')

@@ -11,7 +11,7 @@ optionally, the River Highway map with its fixes.
 
 ## Quick start (Windows)
 
-1. Download **River-Server-v1.1.2.zip** from [Releases](../../releases/latest) and extract it.
+1. Download **River-Server-v1.1.3.zip** from [Releases](../../releases/latest) and extract it.
 2. Run **Iniciar-Servidor.cmd**. The first time it asks for the map (West Coast USA, or River Highway: 1.8 GB map with the
    *riverpack* fixes built in) and whether to hand RLS to the players (recommended), downloads the official BeamMP-Server 3.9.3
    and the chosen optional files (SHA-256 checked) and starts the server.
@@ -26,12 +26,18 @@ the server with `Iniciar-Servidor.cmd` (without the scripts: the same key in
 `Servidor\Resources\Server\RiverLife\config.json`). Players' dealerships and workshops have their own NPC customers,
 switched on and off by their owners in RiverOS.
 
+Career saves: each player gets this server's own career save, loaded automatically on joining and kept on their PC. It
+is named after a fixed server id (`Servidor\Resources\Server\RiverLife\data\server-id.json`), so a new IP address or
+port does not start a new career. To let players pick their save when they join (this server's, another of their
+saves, or a new one), set `"careerSaves": "choose"` in `Servidor\servidor.json`. A player can always get the choice
+with `"chooseCareer": true` in `settings/riverlife/client.json` of their BeamNG profile.
+
 Full guide (Portuguese): [LEIA-ME.md](LEIA-ME.md). Credits: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ---
 
 # River Server (português)
 
-Servidor BeamMP com a carreira do RLS e o RiverLife. Baixe o **River-Server-v1.1.2.zip** em *Releases*, extraia e rode
+Servidor BeamMP com a carreira do RLS e o RiverLife. Baixe o **River-Server-v1.1.3.zip** em *Releases*, extraia e rode
 **Iniciar-Servidor.cmd**: ele pergunta o mapa (West Coast USA ou River Highway) e se entrega o RLS aos jogadores, baixa o
 que precisa e sobe o servidor. Guia completo em [LEIA-ME.md](LEIA-ME.md).

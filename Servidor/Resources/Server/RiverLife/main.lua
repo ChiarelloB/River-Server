@@ -5,7 +5,7 @@ local ROOT = 'Resources/Server/RiverLife/'
 local Domain = dofile(ROOT .. 'domain.lua')
 local Wire = dofile(ROOT .. 'wire.lua')
 
-local cfg, market
+local cfg, market, serverId
 local identities, bindings, uploads, rates, photoIndex, guestTokens = {}, {}, {}, {}, {}, {}
 local presence, slots, requestChunks = {}, {}, {}
 local displayHosts, displaySent, lastSpotsAsk = {}, {}, 0
@@ -18,6 +18,9 @@ local DEFAULTS = {
   npcIntervalSeconds = 150, npcSellerIntervalSeconds = 300, npcCustomerIntervalSeconds = 200,
   npcOwnerRadius = 250, presenceSeconds = 2, backupsToKeep = 3, welcomeMessage = true,
   npcPrivateSellers = 6, -- NPC cars for sale parked in driveways and car parks (0 = none)
+  -- Career saves on joining: 'server' = every player gets this server's own career save, loaded
+  -- automatically; 'choose' = players pick one of their saves (or a new one) every time they join.
+  careerSaves = 'server',
 }
 
 local function log(msg) print('[RiverLife] ' .. msg) end
@@ -580,6 +583,22 @@ function RLDisconnect(pid)
   for key, slot in pairs(slots) do if slot.pid == pid then slots[key] = nil end end
 end
 
+-- Clients name this server's career save after a stable id (the address they connect with can
+-- change: dynamic IPs, tunnels), and learn whether players choose their save.
+local function loadServerId()
+  if type(cfg.serverId) == 'string' and cfg.serverId:match('^[%w_-]+$') and #cfg.serverId <= 32 then return cfg.serverId end
+  local stored = read(ROOT .. 'data/server-id.json')
+  if stored and type(stored.id) == 'string' and stored.id:match('^%x+$') then return stored.id end
+  math.randomseed(os.time() + math.floor((os.clock() % 1) * 1000000))
+  local id = string.format('%06x%06x', math.random(0, 0xffffff), math.random(0, 0xffffff))
+  writeAtomic(ROOT .. 'data/server-id.json', {id = id})
+  return id
+end
+function RLCareerInfo(pid)
+  MP.TriggerClientEvent(pid, 'RLCareerInfo', encode({serverId = serverId,
+    careerSaves = cfg.careerSaves == 'choose' and 'choose' or 'server'}))
+end
+
 function RLJoin(pid)
   if cfg.welcomeMessage then
     MP.SendChatMessage(pid, 'Welcome! This server runs RiverLife: open the PC in any garage or the RiverLife phone app for classifieds, dealerships and workshops. | Bem-vindo! Este servidor usa o RiverLife. Abra o PC de qualquer garagem ou o app RiverLife no celular para classificados, lojas e oficinas.')
@@ -628,6 +647,7 @@ function onInit()
   for k, v in pairs(DEFAULTS) do if cfg[k] == nil then cfg[k] = v end end
   FS.CreateDirectory(ROOT .. 'data'); FS.CreateDirectory(ROOT .. 'data/blobs'); FS.CreateDirectory(ROOT .. 'photos')
   photoIndex = read(ROOT .. 'photos/index.json') or {}
+  serverId = loadServerId()
   guestTokens = read(ROOT .. 'data/guest-identities.json') or {}
   market = Domain.new({now = os.time, encode = encode, save = save, putBlob = putBlob, getBlob = getBlob,
     photoOwned = function(id, ref) return photoIndex[ref] and photoIndex[ref].owner == id end,
@@ -636,6 +656,7 @@ function onInit()
   MP.RegisterEvent('RLRequestChunk', 'RLRequestChunk')
   MP.RegisterEvent('RLPhoto', 'RLPhoto')
   MP.RegisterEvent('RLPresence', 'RLPresence')
+  MP.RegisterEvent('RLCareerInfo', 'RLCareerInfo')
   MP.RegisterEvent('onPlayerDisconnect', 'RLDisconnect')
   MP.RegisterEvent('onPlayerJoin', 'RLJoin')
   MP.RegisterEvent('onConsoleInput', 'RLConsole')

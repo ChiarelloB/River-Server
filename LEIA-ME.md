@@ -1,4 +1,4 @@
-# River Server 1.1.2
+# River Server 1.1.3
 
 Servidor BeamMP com a carreira do **RLS Career Overhaul** e o **RiverLife**: classificados com fotos, visitas pelo GPS,
 lojas de carros e oficinas dos jogadores com funcionários e clientes NPC, bicos, "vende-se na rua", Tabela FIPE do
@@ -9,7 +9,7 @@ entrega a eles o RiverLife, o RLS e (se você escolher) o mapa River Highway com
 
 ## Instalar e rodar (Windows)
 
-1. Baixe **River-Server-v1.1.2.zip** em *Releases* e extraia numa pasta (ex.: `C:\RiverServer`).
+1. Baixe **River-Server-v1.1.3.zip** em *Releases* e extraia numa pasta (ex.: `C:\RiverServer`).
 2. Dê dois cliques em **Iniciar-Servidor.cmd**. Na primeira vez ele pergunta:
    - **Mapa**: West Coast USA (vem com o jogo) ou River Highway (baixa o mapa, 1,8 GB, já com o *riverpack*: as
      correções de árvores, guard-rails, materiais, texturas e entregas para o BeamNG 0.39 e o RLS 2.7.1).
@@ -40,6 +40,14 @@ entradas de casas e estacionamentos, nunca na rua. Para mudar a quantidade, ou d
 mais somem sozinhos (menos os que têm visita marcada). As lojas e oficinas dos jogadores têm os próprios clientes NPC, que o
 dono liga e desliga no RiverOS.
 
+## Saves de carreira
+
+Cada jogador tem um save de carreira deste servidor, que abre sozinho ao entrar e é salvo no PC dele. O nome do save vem
+de um código fixo do servidor (`Servidor\Resources\Server\RiverLife\data\server-id.json`), então trocar de IP ou de
+porta não cria carreira nova. Para os jogadores escolherem o save ao entrar (o deste servidor, outro save deles ou uma
+carreira nova), troque `"careerSaves"` para `"choose"` em `Servidor\servidor.json`. Um jogador também pode pedir sempre
+a escolha pondo `"chooseCareer": true` no `settings\riverlife\client.json` do perfil dele no BeamNG.
+
 ## Console do servidor
 
 - `rl status` — jogadores, anúncios, lojas e oficinas.
@@ -62,7 +70,7 @@ nova, baixa só o que mudou, apaga os arquivos que a versão nova substituiu e s
 | `Iniciar-Servidor.cmd` | Configura na primeira vez e sobe o servidor. `-Mapa river_highway` troca o mapa. |
 | `Configurar.cmd` | Escolhe o mapa e os opcionais e baixa o que faltar. |
 | `Parar-Servidor.cmd` | Encerra o servidor desta pasta. |
-| `Servidor\servidor.json` | Nome, porta, vagas, mapa, chave do BeamMP, vendedores NPC. |
+| `Servidor\servidor.json` | Nome, porta, vagas, mapa, chave do BeamMP, vendedores NPC, escolha de save. |
 | `opcionais.json` | Endereços e SHA-256 do BeamMP-Server e dos opcionais. |
 
-Versão 1.1.2 (RiverLife 73e145c). Créditos de terceiros em `THIRD_PARTY_NOTICES.md`.
+Versão 1.1.3 (RiverLife 0d508c9). Créditos de terceiros em `THIRD_PARTY_NOTICES.md`.

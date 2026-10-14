@@ -37,8 +37,8 @@ if (-not $configured) {
   & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $Mapa
 } elseif ($Mapa -and $Mapa -ne $current) {
   & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $Mapa -Silencioso -SemRLS:$semRLS
-} elseif ($state['versao'] -ne '1.1.2' -or @(Get-Pending $current).Count) {
-  Write-Host "Atualizando para o River Server 1.1.2..." -ForegroundColor Cyan
+} elseif ($state['versao'] -ne '1.1.3' -or @(Get-Pending $current).Count) {
+  Write-Host "Atualizando para o River Server 1.1.3..." -ForegroundColor Cyan
   & (Join-Path $root 'Configurar.ps1') -PeloIniciar -Mapa $current -Silencioso -SemRLS:$semRLS
 }
 $s = [IO.File]::ReadAllText($settingsPath, [Text.Encoding]::UTF8) | ConvertFrom-Json
@@ -49,9 +49,10 @@ if ($pending.Count) {
 
 # Plugin settings kept in servidor.json (it survives updates; the plugin's config.json comes with each release).
 $pluginCfg = Join-Path $server 'Resources\Server\RiverLife\config.json'
-if ($null -ne $s.npcPrivateSellers -and (Test-Path -LiteralPath $pluginCfg)) {
+if (Test-Path -LiteralPath $pluginCfg) {
   $p = [IO.File]::ReadAllText($pluginCfg, [Text.Encoding]::UTF8) | ConvertFrom-Json
-  $p | Add-Member -NotePropertyName npcPrivateSellers -NotePropertyValue ([int]$s.npcPrivateSellers) -Force
+  if ($null -ne $s.npcPrivateSellers) { $p | Add-Member -NotePropertyName npcPrivateSellers -NotePropertyValue ([int]$s.npcPrivateSellers) -Force }
+  if ($s.careerSaves -in @('server', 'choose')) { $p | Add-Member -NotePropertyName careerSaves -NotePropertyValue ([string]$s.careerSaves) -Force }
   [IO.File]::WriteAllText($pluginCfg, ($p | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
 }
 
